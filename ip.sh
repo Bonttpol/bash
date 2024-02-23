@@ -11,6 +11,6 @@ tail -n0 -f $log_path | grep --line-buffered -E '^([1-9]{1,3}\.){3}[1-9]{1,3}' |
 
        if [[ ! $htacs =~ $ip ]] && [[ $cnt =~ "RU" ]]
        then 
-            echo "Deny from $ip" >> $htacs_path
+            echo "Deny from $ip\n" >> $htacs_path
        fi
     done
