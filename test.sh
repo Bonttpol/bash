@@ -1,8 +1,5 @@
 #!/bin/bash
 
-log_path="/var/log/nginx/access.log"
-htacs_path="/root/bash/test"  #"/var/www/html/.htaccess"
-
 # Список уязвимых директорий
 vulnerable_directories=(
   "/bitrix/admin"
@@ -14,19 +11,13 @@ vulnerable_directories=(
 )
 
 # Получить список всех IP-адресов, обращавшихся к уязвимым директориям
-attackers_ip_addresses=$(grep -v "${vulnerable_directories[*]}" $log_path | awk '{print $1}') 
+attackers_ip_addresses=$(grep -r "${vulnerable_directories[*]}" /var/log/nginx/access.log | awk '{print $1}')
 
 # Сгенерировать правила для файла .htaccess
 htaccess_rules=""
-
-for attacker_ip_address in "${attackers_ip_addresses[*]}"; do
-
-    htacs=`cat $htacs_path`
-    if [[ ! $htacs =~ $attacker_ip_address ]]; then 
-        echo "IP - $attacker_ip_address"
-        htaccess_rules+="Deny from $attacker_ip_address\n"
-    fi
+for attacker_ip_address in "${attackers_ip_addresses[@]}"; do
+  htaccess_rules+="deny $attacker_ip_address;\n"
 done
 
 # Добавить правила в файл .htaccess
-echo $htaccess_rules #>> $htacs_path
+echo -e "$htaccess_rules" >> /home/bitrix/www/.htaccess
